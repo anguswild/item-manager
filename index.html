@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://bootswatch.com/4/united/bootstrap.css">
+    <title></title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+  <a class="navbar-brand" href="#">Item Manager</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarsExample04">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="index.html">Home <span class="sr-only">(current)</span></a>
+      </li>
+    </ul>
+  </div>
+</nav>
+<div class="container">
+  <h1>Add Item</h1>
+  <form id="itemForm">
+    <div class="form-group">
+      <label for="text">Text</label>
+      <input type="text" id="text" class="form-control">
+    </div>
+    <div class="form-group">
+      <label for="body">Body</label>
+      <textarea type="text" id="body" class="form-control"></textarea>
+    </div>
+    <div class="form-group">
+      <button type="submit" name="button" class="btn btn-primary">Submit</button>
+    </div>
+  </form>
+  <hr>
+  <div class="card bg-light">
+    <div class="card-body">
+      <ul id="items" class="list-group">
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+    <script src="https://code.jquery.com/jquery-3.4.0.min.js" integrity="sha256-BJeo0qm959uMBGb65z40ejJYGSgR7REI4+CW1fNKwOg=" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      $(document).ready(function(){
+        getItems();
+
+        //Submit event
+        $('#itemForm').on('submit', function(e){
+          e.preventDefault();
+
+          let text = $('#text').val();
+          let body = $('#body').val();
+
+          addItem(text, body);
+        });
+
+        // Delete event
+        $('body').on('click', '.deleteLink', function(e){
+          e.preventDefault();
+
+          let id = $(this).data('id');
+          console.log(id);
+          deleteItem(id);
+        });
+
+        //Delete item function through API
+        function deleteItem(id){
+          $.ajax({
+            method: 'POST',
+            url: 'http://itemapi.test/api/items/'+id,
+            data: {_method: 'DELETE'}
+          }).done(function(item){
+              alert('Item Removed');
+              location.reload();
+          });
+        }
+
+        //Insert Item function through API
+        function addItem(text, body){
+          $.ajax({
+            method: 'POST',
+            url: 'http://itemapi.test/api/items',
+            data: {text: text, body: body}
+          }).done(function(item){
+              alert('Item # '+item.id+' added');
+              location.reload();
+          });
+        }
+
+        //Get items function through API
+        function getItems(){
+          $.ajax({
+            url: 'http://itemapi.test/api/items'
+          }).done(function(items){
+            let output = '';
+            $.each(items, function(key, item){
+              output += `
+                 <li class="list-group-item">
+                  <strong>${item.text}: </strong>${item.body} <a href="#" class="deleteLink" data-id="${item.id}">Delete</a>
+                 </li>
+              `;
+            });
+            $('#items').append(output);
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
